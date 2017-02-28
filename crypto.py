@@ -4,7 +4,7 @@ from Crypto.Hash import SHA256
 
 def encrypt(key, filename):
     chunksize = 64*1024
-    outputFile = "(encryted)" + filename
+    outputFile = "(encryted)"+filename
     filesize = str(os.path.getsize(filename)).zfill(16)
     IV = ''
 
@@ -24,12 +24,12 @@ def encrypt(key, filename):
                     break
                 elif len(chunk) % 16 != 0:
                     chunk += ' ' * (16 - (len(chunk) % 16))
-
-                outfile.write(encryptor.encrypt(chunk))
+                    os.remove(filename)
+                    outfile.write(encryptor.encrypt(chunk))
 
 def decrypt(key, filename):
     chunksize = 64*1024
-    outputFile = filename[11:]
+    outputFile = filename[10:]
 
     with open(filename, 'rb') as infile:
         filesize = long(infile.read(16))
@@ -43,26 +43,35 @@ def decrypt(key, filename):
 
                 if len(chunk) == 0:
                     break
+                else:
+                    os.remove(filename)
+                    outfile.write(decryptor.decrypt(chunk))
+                    outfile.truncate(filesize)
 
-                outfile.write(decryptor.decrypt(chunk))
-            outfile.turncate(filesize)
-
-def getKey(password):
+def get_key(password):
     hasher = SHA256.new(password)
     return hasher.digest()
+
 
 def Main():
     choice = raw_input("Do you want to (E)ncrypt or (D)ecrypt?: ")
 
-    if choice == 'E':
+    if choice == 'E' or choice == 'e':
         filename = raw_input("File to encrypt: ")
         password = raw_input("Password: ")
-        encrypt(getKey(password), filename)
-        print "Done"
-    elif choice == 'D':
-        filename = raw_input("File to decrypt: ")
-        password = raw_input("Password: ")
-        decrypt(getKey(password), filename)
+        try:
+            encrypt(get_key(password), filename)
+            print "... File encrypted"
+        except:
+            print "... Input file does not exist"
+    elif choice == 'D' or choice == 'e':
+        try:
+            filename = raw_input("File to decrypt: ")
+            password = raw_input("Password: ")
+            decrypt(get_key(password), filename)
+            print "... File decrypted"
+        except:
+            print "... Input file does not exist"
     else:
         print "No option selected, closing..."
 
