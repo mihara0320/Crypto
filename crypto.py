@@ -3,6 +3,11 @@ import glob
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 
+# TO DO
+# add unit test + argparse to select test ON OFF
+# html message if possible
+# poslish option & error handling 
+
 EXTENSIONS = {
     "OFFICE": [
         ".txt", ".csv", ".doc", ".docx", ".docm", ".dotm", ".dot", ".wbk", ".xls",
