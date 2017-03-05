@@ -1,12 +1,9 @@
 import os, random
-import glob
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 
-# TO DO
-# add unit test + argparse to select test ON OFF
-# html message if possible
-# poslish option & error handling 
+# Make it do something when user inputs wrong pass 
+
 
 EXTENSIONS = {
     "OFFICE": [
@@ -21,12 +18,11 @@ EXTENSIONS = {
     "AUDIO":[".mp3",".wav", ".aiff", ".aac", ".ogg", ".wma", ".flac", ".alac"],
     "VIDEO":[".avi", ".asf", ".mov", ".avchd", ".vlc", ".mpg", ".mp4", ".wmv"]
 }
+ALL = EXTENSIONS.get("OFFICE")+EXTENSIONS.get("IMAGE")+EXTENSIONS.get("AUDIO")+EXTENSIONS.get("VIDEO")
 OFFICE = EXTENSIONS.get("OFFICE")
 IMAGE = EXTENSIONS.get("IMAGE")
 AUDIO = EXTENSIONS.get("AUDIO")
 VIDEO = EXTENSIONS.get("VIDEO")
-
-KEYWORD = "password"
 
 def encrypt(key, path, filename):
     os.chdir(path)
@@ -80,71 +76,86 @@ def decrypt(key, path, filename):
                     outfile.truncate(filesize)
                     print "[+] "+"\""+filename+"\""+" has been decrypted"
 
-
 def get_key(password):
     hasher = SHA256.new(password)
     return hasher.digest()
 
-def encrypt_all(key, directory):
-
-    result = []
+def encrypt_all(key, directory, file_type):
     sub_directories = [x[0] for x in os.walk(directory)]
 
     for sub_directory in sub_directories:
         files = os.walk(sub_directory).next()[2]
         if (len(files) > 0):
             for file in files:
-                for extension in IMAGE:
+                for extension in file_type:
                     if file.endswith(extension):
                         path = sub_directory + "/"
-                        result.append(path + file)
                         encrypt(get_key(key), path, file)
                     else:
                         pass
 
-def decrypt_all(key, directory):
-    result = []
+def decrypt_all(key, directory, file_type):
     sub_directories = [x[0] for x in os.walk(directory)]
 
     for sub_directory in sub_directories:
         files = os.walk(sub_directory).next()[2]
         if (len(files) > 0):
             for file in files:
-                for extension in IMAGE:
+                for extension in file_type:
                     if file.endswith(extension):
                         path = sub_directory + "/"
-                        result.append(path + file)
                         decrypt(get_key(key), path, file)
                     else:
                         pass
 
+def get_file_type(user_input):
+    option = int(user_input)
+    file_type = None
+
+    if option is 0:
+        file_type = ALL
+    elif option is 1:
+        file_type = OFFICE
+    elif option is 2:
+        file_type = IMAGE
+    elif option is 3:
+        file_type = AUDIO
+    elif option is 4:
+        file_type = VIDEO
+    else:
+        print "[-] Error: Input value is not correct"
+
+    return file_type
 
 def Main():
-    # test()
 
-    choice = raw_input("Enter a directory: ")
-    encrypt_all(KEYWORD, choice)
+    choice = raw_input("Do you want to (E)ncrypt or (D)ecrypt?: ")
+    if choice is "E" or choice is "e" or choice is "D" or choice is "d":
+        password = raw_input("Password: ")
+        directory = raw_input("Directory: ")
+        option = raw_input("""
+    [0] All
+    [1] Office
+    [2] Image
+    [3] Audio
+    [4] Video
 
-    # choice = raw_input("Do you want to (E)ncrypt or (D)ecrypt?: ")
-    #
-    # if choice == 'E' or choice == 'e':
-    #     filename = raw_input("File to encrypt: ")
-    #     password = raw_input("Password: ")
-    #     try:
-    #         encrypt(get_key(password), filename)
-    #         print "... File encrypted"
-    #     except:
-    #         print "... Input file does not exist"
-    # elif choice == 'D' or choice == 'e':
-    #     try:
-    #         filename = raw_input("File to decrypt: ")
-    #         password = raw_input("Password: ")
-    #         decrypt(get_key(password), filename)
-    #         print "... File decrypted"
-    #     except:
-    #         print "... Input file does not exist"
-    # else:
-    #     print "No option selected, closing..."
+File type: """)
+
+        try:
+            if choice is "E" or choice is "e":
+                encrypt_all(get_key(password), directory, get_file_type(option))
+                print "[+] Encryption completed"
+
+            elif choice is "D" or choice is "d":
+                decrypt_all(get_key(password), directory, get_file_type(option))
+                print "[+] Decryption completed"
+        except:
+            print "[-] Cannot find directory path: "+str(directory)
+
+    else:
+        print "[-] Wrong option"
+
 
 if __name__ == '__main__':
     Main()
