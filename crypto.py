@@ -2,9 +2,6 @@ import os, random
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 
-# Make it do something when user inputs wrong pass 
-
-
 EXTENSIONS = {
     "OFFICE": [
         ".txt", ".csv", ".doc", ".docx", ".docm", ".dotm", ".dot", ".wbk", ".xls",
@@ -61,7 +58,6 @@ def decrypt(key, path, filename):
     with open(filename, 'rb') as infile:
         filesize = long(infile.read(16))
         IV = infile.read(16)
-
         decryptor = AES.new(key, AES.MODE_CBC, IV)
 
         with open(outputFile, 'wb') as outfile:
@@ -76,6 +72,7 @@ def decrypt(key, path, filename):
                     outfile.truncate(filesize)
                     print "[+] "+"\""+filename+"\""+" has been decrypted"
 
+
 def get_key(password):
     hasher = SHA256.new(password)
     return hasher.digest()
@@ -85,6 +82,7 @@ def encrypt_all(key, directory, file_type):
 
     for sub_directory in sub_directories:
         files = os.walk(sub_directory).next()[2]
+        print(sub_directory)
         if (len(files) > 0):
             for file in files:
                 for extension in file_type:
@@ -99,6 +97,7 @@ def decrypt_all(key, directory, file_type):
 
     for sub_directory in sub_directories:
         files = os.walk(sub_directory).next()[2]
+        print(sub_directory)
         if (len(files) > 0):
             for file in files:
                 for extension in file_type:
@@ -142,16 +141,19 @@ def Main():
 
 File type: """)
 
-        try:
-            if choice is "E" or choice is "e":
-                encrypt_all(get_key(password), directory, get_file_type(option))
-                print "[+] Encryption completed"
+        # try:
+        if choice is "E" or choice is "e":
+            encrypt_all(get_key(password), directory, get_file_type(option))
+            print "[+] Encryption completed"
 
-            elif choice is "D" or choice is "d":
-                decrypt_all(get_key(password), directory, get_file_type(option))
-                print "[+] Decryption completed"
-        except:
-            print "[-] Cannot find directory path: "+str(directory)
+        elif choice is 'D' or choice is 'd':
+            decrypt_all(get_key(password), directory, get_file_type(option))
+            print "[+] Decryption completed"
+        # except:
+        #     print "[-] Cannot find directory path: "+str(directory)
+        else:
+            print "ERROR"
+            print choice
 
     else:
         print "[-] Wrong option"
